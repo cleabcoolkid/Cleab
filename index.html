@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Infinity Hunt: Gauntlet</title>
+
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#03040b;
+  --panel:rgba(12,16,31,.82);
+  --panel2:rgba(18,23,43,.9);
+  --text:#eef2ff;
+  --muted:#8f9abb;
+  --line:rgba(255,255,255,.09);
+  --cyan:#52dfff;
+  --purple:#a978ff;
+  --danger:#ff557d;
+  --gold:#ffd45a;
+}
+html,body{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(73,47,157,.22),transparent 30%),
+    radial-gradient(circle at 80% 20%,rgba(0,184,255,.12),transparent 28%),
+    #03040b;
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+body{overflow-x:hidden}
+button{
+  font:inherit;
+  color:inherit;
+  border:0;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+button:disabled{
+  opacity:.38;
+  cursor:not-allowed;
+}
+#stars{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  overflow:hidden;
+}
+.star{
+  position:absolute;
+  width:2px;height:2px;
+  background:white;
+  border-radius:50%;
+  opacity:.65;
+  animation:twinkle 2s infinite alternate;
+}
+@keyframes twinkle{to{opacity:.12;transform:scale(.5)}}
+
+.app{
+  width:min(1250px,100%);
+  margin:auto;
+  padding:14px 14px 105px;
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:20;
+  padding:8px 0 14px;
+  backdrop-filter:blur(18px);
+}
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:rgba(5,7,17,.82);
+  box-shadow:0 12px 40px rgba(0,0,0,.35);
+}
+.logo{
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+.logo span{color:var(--cyan)}
+.stats{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.stat{
+  min-width:74px;
+  padding:6px 9px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:rgba(255,255,255,.035);
+  text-align:center;
+}
+.stat small{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.stat b{font-size:13px}
+
+.screen{display:none;animation:fade .25s ease}
+.screen.active{display:block}
+@keyframes fade{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
+
+.hero{
+  margin-top:10px;
+  padding:34px 22px;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:
+    linear-gradient(135deg,rgba(75,39,160,.22),rgba(0,180,255,.06)),
+    var(--panel);
+  text-align:center;
+  overflow:hidden;
+  position:relative;
+}
+.hero:before{
+  content:"";
+  position:absolute;
+  width:240px;height:240px;
+  border-radius:50%;
+  background:rgba(91,64,255,.18);
+  filter:blur(50px);
+  left:50%;top:-100px;
+  transform:translateX(-50%);
+}
+.hero h1{
+  position:relative;
+  font-size:clamp(34px,8vw,68px);
+  margin:0 0 8px;
+  letter-spacing:-2px;
+}
+.hero p{
+  position:relative;
+  max-width:680px;
+  margin:0 auto 20px;
+  color:var(--muted);
+  line-height:1.6;
+}
+.gradient{
+  background:linear-gradient(90deg,#fff,#62dcff,#a879ff);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin-top:16px;
+}
+.card{
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:var(--panel);
+  box-shadow:0 12px 30px rgba(0,0,0,.18);
+}
+.card h3{margin:0 0 7px}
+.card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.section-title{
+  margin:25px 2px 12px;
+  font-size:24px;
+  font-weight:900;
+}
+.btn{
+  padding:12px 16px;
+  border-radius:13px;
+  background:linear-gradient(135deg,#5742ff,#9a53ff);
+  font-weight:800;
+  box-shadow:0 7px 22px rgba(116,73,255,.22);
+}
+.btn.secondary{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  box-shadow:none;
+}
+.btn.danger{
+  background:linear-gradient(135deg,#b92858,#ff4d76);
+}
+.btn.gold{
+  background:linear-gradient(135deg,#bd7b13,#ffe06b);
+  color:#171006;
+}
+.btn.cyan{
+  background:linear-gradient(135deg,#008db8,#55e9ff);
+  color:#001116;
+}
+.btn.small{padding:9px 11px;font-size:12px}
+
+.progress{
+  height:9px;
+  overflow:hidden;
+  background:#090d1c;
+  border-radius:999px;
+  border:1px solid var(--line);
+}
+.progress i{
+  display:block;
+  height:100%;
+  width:0%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#4de5ff,#8d62ff);
+  transition:.3s;
+}
+
+.location-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:13px;
+}
+.location{
+  position:relative;
+  overflow:hidden;
+  min-height:190px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:18px;
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(circle at 80% 20%,rgba(112,80,255,.2),transparent 35%),
+    linear-gradient(145deg,#10152a,#070914);
+}
+.location.locked{filter:grayscale(.7);opacity:.72}
+.location .emoji{font-size:40px;margin-bottom:auto}
+.location h3{margin:0 0 4px}
+.location p{margin:0 0 12px;color:var(--muted);font-size:12px}
+.location .cost{font-size:11px;color:#aab4d7;margin-bottom:9px}
+
+.stone-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+.stone{
+  min-height:205px;
+  padding:18px;
+  border-radius:22px;
+  border:1px solid var(--stone,#555);
+  background:
+    radial-gradient(circle at 80% 15%,var(--glow),transparent 35%),
+    var(--panel);
+  position:relative;
+  overflow:hidden;
+}
+.stone .gem{
+  width:58px;height:58px;
+  margin-bottom:14px;
+  transform:rotate(45deg);
+  border-radius:10px;
+  background:var(--stone);
+  box-shadow:0 0 30px var(--glow);
+}
+.stone .gem:after{
+  content:"";
+  display:block;
+  width:50%;height:50%;
+  margin:25%;
+  background:rgba(255,255,255,.35);
+  border-radius:5px;
+}
+.stone h3{margin:0}
+.stone p{font-size:12px;color:var(--muted)}
+.owned{
+  position:absolute;
+  right:13px;top:13px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(70,255,180,.1);
+  border:1px solid rgba(70,255,180,.3);
+  color:#70ffba;
+  font-size:10px;
+  font-weight:800;
+}
+
+.quest{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:center;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:var(--panel);
+  margin-bottom:9px;
+}
+.quest.done{border-color:rgba(73,255,173,.28)}
+.quest h3{margin:0 0 4px;font-size:15px}
+.quest p{margin:0;color:var(--muted);font-size:12px}
+
+.artifact-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.artifact{
+  padding:15px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--panel);
+}
+.artifact .icon{font-size:32px}
+.artifact h4{margin:9px 0 4px}
+.artifact p{margin:0;color:var(--muted);font-size:11px}
+
+.upgrade-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+.upgrade{
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:var(--panel);
+}
+.upgrade-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+.level{
+  color:var(--cyan);
+  font-size:12px;
+  font-weight:800;
+}
+.cost{color:#ffd45a;font-size:12px}
+
+.nav{
+  position:fixed;
+  z-index:50;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(760px,calc(100% - 18px));
+  display:flex;
+  gap:5px;
+  padding:7px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;
+  background:rgba(7,9,19,.9);
+  backdrop-filter:blur(22px);
+  box-shadow:0 10px 50px rgba(0,0,0,.55);
+}
+.nav-btn{
+  flex:1;
+  padding:9px 4px;
+  border-radius:13px;
+  background:transparent;
+  color:#7f89a8;
+  font-size:10px;
+  font-weight:800;
+}
+.nav-btn.active{
+  color:#fff;
+  background:rgba(117,89,255,.2);
+}
+.nav-btn .nav-icon{
+  display:block;
+  font-size:18px;
+  margin-bottom:2px;
+}
+
+.toast{
+  position:fixed;
+  z-index:100;
+  left:50%;
+  top:20px;
+  transform:translate(-50%,-20px);
+  opacity:0;
+  pointer-events:none;
+  padding:12px 17px;
+  border-radius:13px;
+  background:#11172a;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 15px 40px rgba(0,0,0,.4);
+  transition:.25s;
+  font-size:13px;
+  font-weight:700;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.health-wrap{margin-top:8px}
+.healthbar i{background:linear-gradient(90deg,#ff3e6c,#ff9860)}
+.energybar i{background:linear-gradient(90deg,#31d7ff,#756dff)}
+
+/* GAUNTLET */
+.gauntlet-stage{
+  position:relative;
+  padding:28px 16px 24px;
+  border-radius:28px;
+  border:1px solid rgba(167,120,255,.24);
+  background:
+    radial-gradient(circle at 50% 40%,rgba(124,76,255,.2),transparent 40%),
+    var(--panel);
+  text-align:center;
+  overflow:hidden;
+}
+.gauntlet-stage:before{
+  content:"";
+  position:absolute;
+  inset:25px;
+  border:1px dashed rgba(120,150,255,.13);
+  border-radius:50%;
+  animation:spin 18s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gauntlet{
+  position:relative;
+  z-index:1;
+  width:190px;
+  height:235px;
+  margin:10px auto 15px;
+}
+.palm{
+  position:absolute;
+  width:115px;height:150px;
+  left:38px;top:62px;
+  border-radius:48% 48% 30% 30%;
+  background:linear-gradient(145deg,#34374c,#111522);
+  border:2px solid #656b88;
+  box-shadow:0 0 35px rgba(120,99,255,.25),inset 0 0 20px #070912;
+}
+.finger{
+  position:absolute;
+  width:31px;height:105px;
+  border-radius:20px 20px 10px 10px;
+  background:linear-gradient(145deg,#3d4158,#10131e);
+  border:2px solid #656b88;
+  bottom:102px;
+}
+.f1{left:28px;transform:rotate(-28deg);height:83px}
+.f2{left:59px;height:112px}
+.f3{left:91px;height:120px}
+.f4{left:123px;transform:rotate(22deg);height:95px}
+.thumb{
+  position:absolute;
+  width:38px;height:85px;
+  left:16px;top:110px;
+  border-radius:25px;
+  background:linear-gradient(145deg,#3d4158,#10131e);
+  border:2px solid #656b88;
+  transform:rotate(-42deg);
+}
+.sockets{
+  position:absolute;
+  z-index:3;
+  left:50%;
+  top:101px;
+  transform:translateX(-50%);
+  width:125px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.socket{
+  width:35px;height:35px;
+  border-radius:9px;
+  transform:rotate(45deg);
+  border:2px solid #454a63;
+  background:#080b15;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.socket span{transform:rotate(-45deg);font-size:17px}
+.socket.filled{
+  border-color:var(--c);
+  background:var(--c);
+  box-shadow:0 0 20px var(--g);
+}
+.socket.filled span{filter:drop-shadow(0 0 5px white)}
+
+.charge-box{
+  position:relative;
+  z-index:2;
+  max-width:520px;
+  margin:auto;
+}
+.charge-title{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:#aeb7d4;
+  margin-bottom:7px;
+}
+.charge-bar{height:15px}
+.charge-bar i{
+  background:linear-gradient(90deg,#6b45ff,#e56aff,#ffe16b);
+}
+
+.ability-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:16px;
+}
+.ability{
+  padding:15px;
+  border:1px solid var(--c);
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 100% 0,var(--g),transparent 45%),
+    var(--panel);
+}
+.ability .ability-icon{font-size:28px}
+.ability h3{margin:7px 0 4px;font-size:15px}
+.ability p{margin:0 0 11px;color:var(--muted);font-size:11px;line-height:1.45}
+.ability-meta{
+  display:flex;
+  justify-content:space-between;
+  color:#b6c0df;
+  font-size:10px;
+  margin-bottom:9px;
+}
+
+.locked-gauntlet{
+  text-align:center;
+  padding:45px 20px;
+}
+.locked-gauntlet .big{font-size:72px}
+.locked-gauntlet h2{font-size:28px;margin:12px 0}
+.locked-gauntlet p{max-width:550px;margin:auto;color:var(--muted);line-height:1.6}
+
+/* COMBAT */
+.combat{
+  padding:16px;
+  border:1px solid rgba(255,70,110,.2);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 50% 0,rgba(255,50,90,.13),transparent 35%),
+    var(--panel);
+}
+.combat-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.enemy{
+  margin:18px auto;
+  text-align:center;
+}
+.enemy-orb{
+  width:120px;height:120px;
+  margin:auto;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:52px;
+  background:radial-gradient(circle,#64233d,#110914);
+  border:2px solid #ff4f79;
+  box-shadow:0 0 50px rgba(255,50,100,.22);
+  animation:pulse 2s infinite alternate;
+}
+@keyframes pulse{to{transform:scale(1.04);box-shadow:0 0 75px rgba(255,50,100,.35)}}
+.enemy h2{margin:12px 0 5px}
+.enemy p{margin:0;color:var(--muted);font-size:12px}
+
+.combat-log{
+  min-height:95px;
+  max-height:150px;
+  overflow:auto;
+  padding:12px;
+  border-radius:15px;
+  background:#070a14;
+  border:1px solid var(--line);
+  font-size:12px;
+  color:#b9c3df;
+  line-height:1.55;
+}
+.log-hit{color:#ff7996}
+.log-good{color:#65f4b0}
+.log-ability{color:#d29cff}
+
+.combat-actions{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+  margin-top:12px;
+}
+.combat-abilities{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:12px;
+}
+.combat-ability{
+  padding:12px 7px;
+  border-radius:13px;
+  border:1px solid var(--c);
+  background:rgba(255,255,255,.035);
+  font-size:11px;
+  font-weight:800;
+}
+.combat-ability b{display:block;font-size:20px;margin-bottom:4px}
+.combat-ability small{display:block;color:#9ba5c2;margin-top:3px}
+
+.warning{
+  padding:12px;
+  border:1px solid rgba(255,190,70,.2);
+  background:rgba(255,190,70,.05);
+  border-radius:14px;
+  color:#d8c898;
+  font-size:11px;
+  margin-top:13px;
+}
+
+@media(max-width:850px){
+  .grid,.location-grid,.stone-grid{grid-template-columns:repeat(2,1fr)}
+  .artifact-grid{grid-template-columns:repeat(2,1fr)}
+  .ability-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .app{padding:8px 9px 100px}
+  .topbar{padding:11px}
+  .logo{font-size:16px}
+  .stat{min-width:61px;padding:5px}
+  .stat small{font-size:7px}
+  .stat b{font-size:11px}
+  .hero{padding:28px 15px}
+  .hero h1{font-size:39px}
+  .grid,.location-grid,.stone-grid,.upgrade-grid{grid-template-columns:1fr}
+  .artifact-grid{grid-template-columns:repeat(2,1fr)}
+  .ability-grid{grid-template-columns:1fr}
+  .nav{overflow-x:auto}
+  .nav-btn{min-width:58px}
+  .combat-abilities{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+
+<body>
+<div id="stars"></div>
+
+<div class="app">
+<header>
+  <div class="topbar">
+    <div class="logo">∞ <span>INFINITY HUNT</span></div>
+    <div class="stats">
+      <div class="stat"><small>Credits</small><b id="money">0</b></div>
+      <div class="stat"><small>Energy</small><b id="energy">0/0</b></div>
+      <div class="stat"><small>HP</small><b id="health">0/0</b></div>
+      <div class="stat"><small>Level</small><b id="level">1</b></div>
+    </div>
+  </div>
+</header>
+
+<!-- HOME -->
+<section id="home" class="screen active">
+  <div class="hero">
+    <h1 class="gradient">INFINITY HUNT</h1>
+    <p>
+      Six Stones. One Gauntlet. Endless worlds.
+      Hunt ancient powers, survive increasingly lethal enemies,
+      forge the Infinity Gauntlet and decide what happens when
+      you finally possess all six.
+    </p>
+    <button class="btn" onclick="switchScreen('explore')">🚀 Begin Expedition</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>💎 Six Stones</h3>
+      <p>Every Infinity Stone has a unique combat ability. Finding one changes how you fight.</p>
+    </div>
+    <div class="card">
+      <h3>🧤 The Gauntlet</h3>
+      <p>Forge the Gauntlet, equip your Stones and build enough charge to unleash SNAP.</p>
+    </div>
+    <div class="card">
+      <h3>☠️ The Void Evolves</h3>
+      <p>Enemies scale with your level. Elite enemies and bosses can destroy an unprepared hunter.</p>
+    </div>
+  </div>
+
+  <div class="section-title">Hunter Progress</div>
+  <div class="card">
+    <div class="upgrade-row">
+      <b>XP Progress</b>
+      <span id="xpText">0 / 100</span>
+    </div>
+    <div class="progress" style="margin-top:9px"><i id="xpBar"></i></div>
+    <div class="health-wrap">
+      <div class="upgrade-row"><span>Health</span><span id="homeHealth">100 / 100</span></div>
+      <div class="progress healthbar"><i id="homeHealthBar"></i></div>
+    </div>
+    <div class="health-wrap">
+      <div class="upgrade-row"><span>Energy</span><span id="homeEnergy">100 / 100</span></div>
+      <div class="progress energybar"><i id="homeEnergyBar"></i></div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPLORE -->
+<section id="explore" class="screen">
+  <div class="section-title">🌌 Explore the Cosmos</div>
+  <p style="color:var(--muted);font-size:13px">
+    Higher regions are significantly more dangerous. You cannot simply out-heal everything.
+  </p>
+  <div id="locations" class="location-grid"></div>
+</section>
+
+<!-- STONES -->
+<section id="stones" class="screen">
+  <div class="section-title">💎 Infinity Stones</div>
+  <p style="color:var(--muted);font-size:13px">
+    These are not trophies. Once you forge the Gauntlet, each Stone becomes a usable combat ability.
+  </p>
+  <div id="stoneGrid" class="stone-grid"></div>
+</section>
+
+<!-- GAUNTLET -->
+<section id="gauntletScreen" class="screen">
+  <div class="section-title">🧤 Infinity Gauntlet</div>
+  <div id="gauntletContent"></div>
+</section>
+
+<!-- QUESTS -->
+<section id="quests" class="screen">
+  <div class="section-title">📜 Hunter Quests</div>
+  <div id="questList"></div>
+</section>
+
+<!-- INVENTORY -->
+<section id="inventory" class="screen">
+  <div class="section-title">🎒 Inventory</div>
+  <div class="card">
+    <h3>Artifacts</h3>
+    <p>Rare cosmic artifacts recovered during expeditions.</p>
+  </div>
+  <div id="artifactGrid" class="artifact-grid" style="margin-top:12px"></div>
+</section>
+
+<!-- UPGRADES -->
+<section id="upgrades" class="screen">
+  <div class="section-title">⚙️ Hunter Upgrades</div>
+  <div id="upgradeGrid" class="upgrade-grid"></div>
+</section>
+
+<!-- COMBAT -->
+<section id="combatScreen" class="screen">
+  <div id="combatContent"></div>
+</section>
+
+<nav class="nav">
+  <button class="nav-btn active" data-screen="home" onclick="switchScreen('home')">
+    <span class="nav-icon">🏠</span>Base
+  </button>
+  <button class="nav-btn" data-screen="explore" onclick="switchScreen('explore')">
+    <span class="nav-icon">🌌</span>Explore
+  </button>
+  <button class="nav-btn" data-screen="stones" onclick="switchScreen('stones')">
+    <span class="nav-icon">💎</span>Stones
+  </button>
+  <button class="nav-btn" data-screen="gauntletScreen" onclick="switchScreen('gauntletScreen')">
+    <span class="nav-icon">🧤</span>Gauntlet
+  </button>
+  <button class="nav-btn" data-screen="quests" onclick="switchScreen('quests')">
+    <span class="nav-icon">📜</span>Quests
+  </button>
+  <button class="nav-btn" data-screen="inventory" onclick="switchScreen('inventory')">
+    <span class="nav-icon">🎒</span>Items
+  </button>
+  <button class="nav-btn" data-screen="upgrades" onclick="switchScreen('upgrades')">
+    <span class="nav-icon">⚙️</span>Upgrade
+  </button>
+  <button id="battleNav" class="nav-btn" data-screen="combatScreen" onclick="switchScreen('combatScreen')" style="display:none">
+    <span class="nav-icon">⚔️</span>Battle
+  </button>
+</nav>
+
+<div id="toast" class="toast"></div>
+</div>
+
+<script>
+/* =========================================================
+   INFINITY HUNT — GAUNTLET EDITION
+   ========================================================= */
+
+const SAVE_KEY="infinityHuntGauntletSave";
+
+const stoneData={
+  space:{
+    name:"Space Stone",emoji:"🔷",color:"#36cfff",glow:"rgba(54,207,255,.28)",
+    location:"Deep Space",ability:"Blink",
+    desc:"Teleport through reality, strike the enemy and evade their next attack.",
+    cost:18
+  },
+  mind:{
+    name:"Mind Stone",emoji:"🟨",color:"#ffe05b",glow:"rgba(255,224,91,.25)",
+    location:"Verdant Moon",ability:"Mind Shatter",
+    desc:"Crush the enemy's concentration and weaken its attacks.",
+    cost:22
+  },
+  reality:{
+    name:"Reality Stone",emoji:"🔴",color:"#ff4965",glow:"rgba(255,73,101,.28)",
+    location:"Crimson Wastes",ability:"Reality Tear",
+    desc:"Rip open reality for enormous damage, but suffer a small recoil.",
+    cost:30
+  },
+  power:{
+    name:"Power Stone",emoji:"🟣",color:"#b06cff",glow:"rgba(176,108,255,.3)",
+    location:"Deep Space",ability:"Cosmic Annihilation",
+    desc:"Release catastrophic force at an extreme energy cost.",
+    cost:40
+  },
+  time:{
+    name:"Time Stone",emoji:"🟢",color:"#57ed8b",glow:"rgba(87,237,139,.26)",
+    location:"Ancient Ruins",ability:"Rewind",
+    desc:"Manipulate the timeline to restore health and partially reverse damage.",
+    cost:28
+  },
+  soul:{
+    name:"Soul Stone",emoji:"🟠",color:"#ff9b45",glow:"rgba(255,155,69,.27)",
+    location:"The Void",ability:"Soul Drain",
+    desc:"Rip life force from the enemy and convert part of it into health.",
+    cost:32
+  }
+};
+
+const locations=[
+  {id:"earth",name:"Earth Orbit",emoji:"🌍",cost:15,danger:1,desc:"Abandoned orbital stations."},
+  {id:"space",name:"Deep Space",emoji:"🌌",cost:25,danger:2,desc:"Dead stars and drifting ruins."},
+  {id:"crimson",name:"Crimson Wastes",emoji:"🔴",cost:32,danger:3,desc:"A planet where reality is unstable."},
+  {id:"moon",name:"Verdant Moon",emoji:"🌙",cost:35,danger:4,desc:"Psychic life forms hunt intruders."},
+  {id:"ruins",name:"Ancient Ruins",emoji:"🏛️",cost:42,danger:5,desc:"Time itself behaves incorrectly."},
+  {id:"void",name:"The Void",emoji:"🕳️",cost:55,danger:7,desc:"The final frontier. Nothing here wants you alive."}
+];
+
+const artifacts=[
+  ["Starblade","⚔️","A weapon forged inside a dying star."],
+  ["Void Armor","🛡️","Armor that drinks attacks from the darkness."],
+  ["Cosmic Eye","👁️","Sees objects hidden outside normal space."],
+  ["Ancient Crown","👑","A relic worn by forgotten cosmic rulers."],
+  ["Orbital Core","⚙️","A miniature artificial reactor."],
+  ["Mystic Crystal","🔮","It whispers coordinates to impossible places."],
+  ["Astral Wings","🪽","A strange relic that bends gravity."],
+  ["Quantum Shard","💠","A fragment of a collapsed universe."]
+];
+
+let game={
+  money:300,
+  energy:100,
+  maxEnergy:100,
+  health:100,
+  maxHealth:100,
+  level:1,
+  xp:0,
+  xpNeeded:100,
+
+  attack:15,
+  defense:5,
+
+  weaponLevel:1,
+  armorLevel:1,
+  reactorLevel:1,
+  scannerLevel:1,
+
+  stones:[],
+  artifacts:[],
+  locationsVisited:[],
+  expeditions:0,
+  enemiesDefeated:0,
+  bossesDefeated:0,
+
+  questsCompleted:[],
+
+  gauntlet:{
+    forged:false,
+    equipped:[],
+    charge:0,
+    maxCharge:100,
+    forgeLevel:1
+  },
+
+  activeEnemy:null,
+  combatLocation:null,
+  combatLogs:[],
+  combatHeals:2,
+  combatTurn:0,
+  enemyWeaken:0,
+  evasion:false,
+  lastHealth:100,
+  snapCooldown:0,
+
+  stats:{
+    damageTaken:0,
+    abilitiesUsed:0,
+    combosUsed:0
+  }
+};
+
+function save(){
+  localStorage.setItem(SAVE_KEY,JSON.stringify(game));
+}
+
+function load(){
+  const raw=localStorage.getItem(SAVE_KEY);
+  if(!raw)return;
+  try{
+    const saved=JSON.parse(raw);
+    game=Object.assign(game,saved);
+    game.gauntlet=Object.assign({
+      forged:false,equipped:[],charge:0,maxCharge:100,forgeLevel:1
+    },saved.gauntlet||{});
+    game.stats=Object.assign({
+      damageTaken:0,abilitiesUsed:0,combosUsed:0
+    },saved.stats||{});
+  }catch(e){}
+}
+
+function resetGame(){
+  if(confirm("Erase your entire Infinity Hunt save?")){
+    localStorage.removeItem(SAVE_KEY);
+    location.reload();
+  }
+}
+
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>t.classList.remove("show"),2300);
+}
+
+function switchScreen(id){
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+  const target=document.getElementById(id);
+  if(target)target.classList.add("active");
+
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.screen===id);
+  });
+
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function format(n){
+  return Math.floor(n).toLocaleString();
+}
+
+function xpGain(amount){
+  game.xp+=amount;
+
+  while(game.xp>=game.xpNeeded){
+    game.xp-=game.xpNeeded;
+    game.level++;
+    game.xpNeeded=Math.floor(game.xpNeeded*1.42);
+
+    game.maxHealth+=12;
+    game.maxEnergy+=10;
+    game.attack+=3;
+    game.defense+=1;
+    game.health=game.maxHealth;
+    game.energy=game.maxEnergy;
+
+    toast("⬆️ LEVEL UP! You are now Level "+game.level);
+  }
+}
+
+function baseRestore(){
+  game.health=game.maxHealth;
+  game.energy=game.maxEnergy;
+  game.combatHeals=2;
+  toast("🏠 Systems restored.");
+  save();
+  render();
+}
+
+function hasStone(id){
+  return game.stones.includes(id);
+}
+
+/* ================= LOCATION ================= */
+
+function renderLocations(){
+  const el=document.getElementById("locations");
+  el.innerHTML=locations.map(loc=>{
+    const visited=game.locationsVisited.includes(loc.id);
+    const locked=game.level<Math.max(1,loc.danger-2);
+
+    return `
+      <div class="location ${locked?"locked":""}">
+        <div class="emoji">${loc.emoji}</div>
+        <h3>${loc.name}</h3>
+        <p>${loc.desc}</p>
+        <div class="cost">⚡ ${loc.cost} energy · Danger ${loc.danger}/7 ${visited?"· VISITED":""}</div>
+        <button class="btn small" onclick="explore('${loc.id}')" ${locked||game.energy<loc.cost?"disabled":""}>
+          ${locked?"🔒 Requires Lv."+Math.max(1,loc.danger-2):"Explore"}
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+function explore(id){
+  const loc=locations.find(x=>x.id===id);
+  if(!loc)return;
+
+  if(game.energy<loc.cost){
+    toast("⚡ Not enough energy.");
+    return;
+  }
+
+  game.energy-=loc.cost;
+  game.expeditions++;
+
+  if(!game.locationsVisited.includes(id))
+    game.locationsVisited.push(id);
+
+  const roll=Math.random();
+
+  /*
+    Stone chance is intentionally low.
+    Scanner improves it, but never makes it trivial.
+  */
+  const stoneChance=.075+(game.scannerLevel*.012);
+  const bossChance=.07+(loc.danger*.018)+(game.level*.004);
+
+  if(roll<stoneChance && stoneForLocation(loc.id)){
+    startGuardian(loc,stoneForLocation(loc.id));
+  }
+  else if(roll<stoneChance+bossChance && loc.danger>=3){
+    startBoss(loc);
+  }
+  else if(roll<.73){
+    startEnemy(loc);
+  }
+  else if(roll<.87){
+    findArtifact(loc);
+  }
+  else{
+    const reward=Math.floor(20+Math.random()*28+game.level*4);
+    game.money+=reward;
+    xpGain(Math.floor(12+loc.danger*5));
+    toast("💰 You recovered "+reward+" credits.");
+  }
+
+  save();
+  render();
+}
+
+function stoneForLocation(id){
+  if(id==="space" && !hasStone("space"))return "space";
+  if(id==="space" && !hasStone("power"))return "power";
+  if(id==="moon" && !hasStone("mind"))return "mind";
+  if(id==="crimson" && !hasStone("reality"))return "reality";
+  if(id==="ruins" && !hasStone("time"))return "time";
+  if(id==="void" && !hasStone("soul"))return "soul";
+  return null;
+}
+
+function findArtifact(loc){
+  const missing=artifacts.filter(a=>!game.artifacts.includes(a[0]));
+
+  if(missing.length){
+    const item=missing[Math.floor(Math.random()*missing.length)];
+    game.artifacts.push(item[0]);
+    game.money+=15;
+    xpGain(20+loc.danger*4);
+    toast("✨ Artifact found: "+item[0]);
+  }else{
+    const reward=35+loc.danger*12;
+    game.money+=reward;
+    toast("✨ Duplicate relic sold for "+reward+" credits.");
+  }
+}
+
+/* ================= ENEMIES ================= */
+
+const enemyTypes={
+  earth:[
+    ["Void Scavenger","👾",55,10,38,30],
+    ["Orbital Predator","🦂",72,13,45,36]
+  ],
+  space:[
+    ["Void Stalker","👹",82,15,55,44],
+    ["Star Devourer","🐙",110,19,72,58]
+  ],
+  crimson:[
+    ["Crimson Beast","🦖",135,22,85,72],
+    ["Reality Reaper","☠️",165,25,105,88]
+  ],
+  moon:[
+    ["Psychic Warden","🧠",180,28,125,105],
+    ["Mind Colossus","👁️",215,32,150,125]
+  ],
+  ruins:[
+    ["Ruin Guardian","🗿",240,35,175,150],
+    ["Chrono Tyrant","⏳",285,40,220,180]
+  ],
+  void:[
+    ["Void Titan","👺",330,46,280,230],
+    ["Abyssal Leviathan","🐉",410,53,360,290]
+  ]
+};
+
+function createEnemy(base,loc,boss=false){
+  const scale=1+(game.level-1)*.17+(loc.danger-1)*.11;
+
+  return {
+    name:base[0],
+    emoji:base[1],
+    maxHp:Math.floor(base[2]*scale*(boss?1.65:1)),
+    hp:Math.floor(base[2]*scale*(boss?1.65:1)),
+    attack:Math.floor(base[3]*scale*(boss?1.28:1)),
+    reward:Math.floor(base[4]*scale*(boss?1.7:1)),
+    xp:Math.floor(base[5]*scale*(boss?1.5:1)),
+    boss,
+    turns:0,
+    shield:boss?Math.floor(12+game.level*4):0
+  };
+}
+
+function startEnemy(loc){
+  const pool=enemyTypes[loc.id]||enemyTypes.earth;
+  const base=pool[Math.floor(Math.random()*pool.length)];
+
+  game.activeEnemy=createEnemy(base,loc,false);
+  game.combatLocation=loc;
+  game.combatLogs=[];
+  game.combatHeals=2;
+  game.combatTurn=0;
+  game.enemyWeaken=0;
+  game.evasion=false;
+  game.lastHealth=game.health;
+
+  addCombatLog("⚠️ "+game.activeEnemy.name+" detected.","log-hit");
+  switchScreen("combatScreen");
+}
+
+function startBoss(loc){
+  const pool=enemyTypes[loc.id]||enemyTypes.earth;
+  const base=pool[1]||pool[0];
+
+  game.activeEnemy=createEnemy(base,loc,true);
+  game.combatLocation=loc;
+  game.combatLogs=[];
+  game.combatHeals=2;
+  game.combatTurn=0;
+  game.enemyWeaken=0;
+  game.evasion=false;
+  game.lastHealth=game.health;
+
+  addCombatLog("☠️ BOSS ENCOUNTER: "+game.activeEnemy.name,"log-hit");
+  addCombatLog("The creature is far stronger than normal enemies.","log-hit");
+
+  switchScreen("combatScreen");
+}
+
+function startGuardian(loc,stone){
+  const base=[
+    "Guardian of the "+stoneData[stone].name,
+    stoneData[stone].emoji,
+    300,
+    43,
+    350,
+    280
+  ];
+
+  game.activeEnemy=createEnemy(base,loc,true);
+  game.activeEnemy.guardianStone=stone;
+  game.combatLocation=loc;
+  game.combatLogs=[];
+  game.combatHeals=2;
+  game.combatTurn=0;
+  game.enemyWeaken=0;
+  game.evasion=false;
+  game.lastHealth=game.health;
+
+  addCombatLog("💎 STONE GUARDIAN AWAKENS.","log-ability");
+  addCombatLog("Defeat it to claim the "+stoneData[stone].name+".","log-ability");
+
+  switchScreen("combatScreen");
+}
+
+function addCombatLog(text,cls=""){
+  game.combatLogs.unshift(`<div class="${cls}">${text}</div>`);
+  if(game.combatLogs.length>12)game.combatLogs.pop();
+}
+
+function enemyTurn(){
+  const e=game.activeEnemy;
+  if(!e)return;
+
+  game.combatTurn++;
+  e.turns++;
+
+  if(game.evasion){
+    addCombatLog("🌀 You phase out of reality. The attack misses!","log-ability");
+    game.evasion=false;
+    return;
+  }
+
+  let multiplier=.82+Math.random()*.46;
+  let attack=e.attack;
+
+  if(game.enemyWeaken>0){
+    attack*=.62;
+    game.enemyWeaken--;
+  }
+
+  /*
+    Every third enemy turn triggers a special attack.
+  */
+  let special=false;
+  if(e.turns%3===0){
+    special=true;
+    attack*=1.35;
+  }
+
+  const damage=Math.max(3,Math.floor(attack*multiplier-game.defense*.72));
+
+  game.lastHealth=game.health;
+  game.health-=damage;
+  game.stats.damageTaken+=damage;
+
+  if(special){
+    addCombatLog("☠️ "+e.name+" unleashes a SPECIAL ATTACK for "+damage+" damage!","log-hit");
+  }else{
+    addCombatLog("💥 "+e.name+" hits you for "+damage+" damage.","log-hit");
+  }
+
+  if(e.turns%4===0 && e.shield<=0 && e.boss){
+    e.shield=Math.floor(20+game.level*5);
+    addCombatLog("🛡️ The boss generates a "+e.shield+" HP shield!","log-hit");
+  }
+
+  if(game.health<=0){
+    loseBattle();
+  }
+}
+
+function playerAttack(){
+  if(!game.activeEnemy)return;
+
+  const e=game.activeEnemy;
+
+  let damage=Math.floor(game.attack*(.72+Math.random()*.48));
+
+  if(e.shield>0){
+    const absorbed=Math.min(e.shield,damage);
+    e.shield-=absorbed;
+    damage-=absorbed;
+    addCombatLog("🛡️ The shield absorbs "+absorbed+" damage.","log-hit");
+  }
+
+  if(damage>0){
+    e.hp-=damage;
+    addCombatLog("⚔️ You deal "+damage+" damage.","log-good");
+  }
+
+  game.gauntlet.charge=Math.min(
+    game.gauntlet.maxCharge,
+    game.gauntlet.charge+7
+  );
+
+  if(e.hp<=0){
+    winBattle();
+    return;
+  }
+
+  enemyTurn();
+  save();
+  render();
+}
+
+function energyStrike(){
+  if(!game.activeEnemy)return;
+
+  const cost=25;
+
+  if(game.energy<cost){
+    toast("⚡ Need "+cost+" energy.");
+    return;
+  }
+
+  game.energy-=cost;
+
+  const e=game.activeEnemy;
+  let damage=Math.floor(game.attack*1.75+Math.random()*18);
+
+  if(e.shield>0){
+    const absorbed=Math.min(e.shield,damage);
+    e.shield-=absorbed;
+    damage-=absorbed;
+    addCombatLog("🛡️ Shield absorbs "+absorbed+" energy damage.","log-hit");
+  }
+
+  e.hp-=damage;
+  game.gauntlet.charge=Math.min(game.gauntlet.maxCharge,game.gauntlet.charge+14);
+
+  addCombatLog("⚡ ENERGY STRIKE deals "+damage+" damage!","log-ability");
+
+  if(e.hp<=0){
+    winBattle();
+    return;
+  }
+
+  enemyTurn();
+  save();
+  render();
+}
+
+function combatHeal(){
+  if(!game.activeEnemy)return;
+
+  if(game.combatHeals<=0){
+    toast("🩹 No medkits left.");
+    return;
+  }
+
+  if(game.energy<20){
+    toast("⚡ Need 20 energy.");
+    return;
+  }
+
+  game.energy-=20;
+  game.combatHeals--;
+
+  const amount=Math.floor(28+game.maxHealth*.13);
+  game.health=Math.min(game.maxHealth,game.health+amount);
+
+  addCombatLog("🩹 Medkit restores "+amount+" HP.","log-good");
+
+  enemyTurn();
+  save();
+  render();
+}
+
+function retreat(){
+  if(!game.activeEnemy)return;
+
+  const loss=Math.min(game.money,20+game.combatLocation.danger*8);
+  game.money-=loss;
+  game.energy=Math.max(0,game.energy-5);
+
+  addCombatLog("🏃 You retreat and lose "+loss+" credits.","log-hit");
+
+  game.activeEnemy=null;
+  game.combatLocation=null;
+  save();
+
+  toast("You escaped.");
+  switchScreen("explore");
+}
+
+function loseBattle(){
+  const loss=Math.min(game.money,Math.floor(game.money*.12));
+  game.money-=loss;
+
+  game.health=Math.floor(game.maxHealth*.32);
+  game.energy=Math.floor(game.maxEnergy*.25);
+  game.activeEnemy=null;
+
+  toast("☠️ Defeated. Lost "+loss+" credits.");
+  save();
+  switchScreen("explore");
+}
+
+function winBattle(){
+  const e=game.activeEnemy;
+  if(!e)return;
+
+  game.money+=e.reward;
+  game.enemiesDefeated++;
+  if(e.boss)game.bossesDefeated++;
+
+  xpGain(e.xp);
+
+  if(e.guardianStone){
+    const s=e.guardianStone;
+    if(!hasStone(s)){
+      game.stones.push(s);
+      addCombatLog("💎 YOU CLAIMED THE "+stoneData[s].name.toUpperCase()+"!","log-ability");
+    }
+  }
+
+  toast("🏆 Victory! +"+e.reward+" credits · +"+e.xp+" XP");
+
+  game.activeEnemy=null;
+  game.combatLocation=null;
+  save();
+
+  setTimeout(()=>{
+    switchScreen("explore");
+  },350);
+}
+
+/* ================= GAUNTLET ================= */
+
+function forgeCost(){
+  return 1600+Math.max(0,game.gauntlet.forgeLevel-1)*1000;
+}
+
+function canForge(){
+  return game.stones.length>=3 &&
+         game.artifacts.length>=3 &&
+         game.money>=forgeCost();
+}
+
+function forgeGauntlet(){
+  if(game.gauntlet.forged){
+    toast("🧤 The Gauntlet is already forged.");
+    return;
+  }
+
+  if(game.stones.length<3){
+    toast("💎 You need at least 3 Stones.");
+    return;
+  }
+
+  if(game.artifacts.length<3){
+    toast("✨ You need at least 3 artifacts.");
+    return;
+  }
+
+  if(game.money<forgeCost()){
+    toast("💰 You need "+format(forgeCost())+" credits.");
+    return;
+  }
+
+  game.money-=forgeCost();
+  game.gauntlet.forged=true;
+  game.gauntlet.charge=0;
+
+  /*
+    Automatically equips every Stone currently owned.
+  */
+  game.gauntlet.equipped=[...game.stones];
+
+  toast("🧤 THE INFINITY GAUNTLET HAS BEEN FORGED.");
+  save();
+  render();
+}
+
+function toggleStone(id){
+  if(!game.gauntlet.forged){
+    toast("Forge the Gauntlet first.");
+    return;
+  }
+
+  if(!hasStone(id))return;
+
+  if(game.gauntlet.equipped.includes(id)){
+    game.gauntlet.equipped=game.gauntlet.equipped.filter(x=>x!==id);
+    toast(stoneData[id].name+" removed.");
+  }else{
+    game.gauntlet.equipped.push(id);
+    toast(stoneData[id].name+" equipped.");
+  }
+
+  save();
+  render();
+}
+
+function gainCharge(amount){
+  game.gauntlet.charge=Math.min(
+    game.gauntlet.maxCharge,
+    game.gauntlet.charge+amount
+  );
+}
+
+function useAbility(id){
+  if(!game.activeEnemy){
+    toast("Enter combat first.");
+    return;
+  }
+
+  if(!game.gauntlet.forged){
+    toast("You do not have the Gauntlet.");
+    return;
+  }
+
+  if(!game.gauntlet.equipped.includes(id)){
+    toast("Equip that Stone first.");
+    return;
+  }
+
+  const s=stoneData[id];
+
+  if(game.energy<s.cost){
+    toast("⚡ Need "+s.cost+" energy.");
+    return;
+  }
+
+  game.energy-=s.cost;
+  game.stats.abilitiesUsed++;
+
+  const e=game.activeEnemy;
+  let damage=0;
+
+  if(id==="space"){
+    damage=Math.floor(game.attack*1.45+Math.random()*14);
+    game.evasion=true;
+    addCombatLog("🔷 BLINK — you tear through space and evade the next attack.","log-ability");
+  }
+
+  if(id==="mind"){
+    damage=Math.floor(game.attack*1.3+Math.random()*12);
+    game.enemyWeaken=2;
+    addCombatLog("🟨 MIND SHATTER — enemy attacks weakened for 2 turns.","log-ability");
+  }
+
+  if(id==="reality"){
+    damage=Math.floor(game.attack*2.45+Math.random()*25);
+    const recoil=Math.floor(game.maxHealth*.035);
+    game.health-=recoil;
+    addCombatLog("🔴 REALITY TEAR — "+damage+" damage. Reality recoils for "+recoil+" HP.","log-ability");
+  }
+
+  if(id==="power"){
+    damage=Math.floor(game.attack*3.15+Math.random()*30);
+    addCombatLog("🟣 COSMIC ANNIHILATION — "+damage+" catastrophic damage!","log-ability");
+  }
+
+  if(id==="time"){
+    const heal=Math.floor(game.maxHealth*.30);
+    const before=game.health;
+    game.health=Math.max(
+      game.health,
+      Math.min(game.maxHealth,game.health+heal)
+    );
+
+    if(game.lastHealth>before){
+      game.health=Math.max(game.health,Math.min(game.maxHealth,game.lastHealth));
+    }
+
+    addCombatLog("🟢 REWIND — the timeline restores your body.","log-ability");
+    damage=0;
+  }
+
+  if(id==="soul"){
+    damage=Math.floor(game.attack*1.85+Math.random()*18);
+    const heal=Math.floor(damage*.48);
+    game.health=Math.min(game.maxHealth,game.health+heal);
+    addCombatLog("🟠 SOUL DRAIN — "+damage+" damage and "+heal+" HP stolen.","log-ability");
+  }
+
+  if(damage>0){
+    if(e.shield>0){
+      const absorbed=Math.min(e.shield,damage);
+      e.shield-=absorbed;
+      damage-=absorbed;
+      addCombatLog("🛡️ Boss shield absorbs "+absorbed+".","log-hit");
+    }
+
+    if(damage>0)e.hp-=damage;
+  }
+
+  gainCharge(id==="power"?24:18);
+
+  /*
+    Small bonus for chaining different Stones.
+  */
+  if(game.lastAbility && game.lastAbility!==id){
+    game.stats.combosUsed++;
+    gainCharge(8);
+    addCombatLog("✨ STONE COMBO — +8 Gauntlet charge.","log-ability");
+  }
+
+  game.lastAbility=id;
+
+  if(e.hp<=0){
+    winBattle();
+    return;
+  }
+
+  if(game.health<=0){
+    loseBattle();
+    return;
+  }
+
+  enemyTurn();
+
+  if(game.health<=0)return;
+
+  save();
+  render();
+}
+
+function snap(){
+  if(!game.activeEnemy){
+    toast("SNAP can only be used in combat.");
+    return;
+  }
+
+  if(!game.gauntlet.forged){
+    toast("You need the Infinity Gauntlet.");
+    return;
+  }
+
+  if(game.gauntlet.equipped.length<6){
+    toast("All six Stones must be equipped.");
+    return;
+  }
+
+  if(game.gauntlet.charge<100){
+    toast("The Gauntlet needs 100% charge.");
+    return;
+  }
+
+  if(game.energy<60){
+    toast("⚡ SNAP requires 60 energy.");
+    return;
+  }
+
+  game.energy-=60;
+  game.gauntlet.charge=0;
+
+  const e=game.activeEnemy;
+
+  let damage;
+  if(e.boss){
+    damage=Math.floor(e.maxHp*.58);
+  }else{
+    damage=Math.floor(e.maxHp*.92);
+  }
+
+  e.hp-=damage;
+
+  addCombatLog("💥💥💥 SNAP! Half the battlefield disappears.","log-ability");
+  addCombatLog("Reality suffers "+damage+" damage.","log-ability");
+
+  if(e.hp<=0){
+    winBattle();
+    return;
+  }
+
+  /*
+    SNAP does not end a boss fight automatically.
+    The boss gets one brutal retaliation.
+  */
+  enemyTurn();
+
+  save();
+  render();
+}
+
+/* ================= RENDER GAUNTLET ================= */
+
+function renderGauntlet(){
+  const el=document.getElementById("gauntletContent");
+
+  if(!game.gauntlet.forged){
+    el.innerHTML=`
+      <div class="gauntlet-stage locked-gauntlet">
+        <div class="big">🧤</div>
+        <h2>THE INFINITY GAUNTLET</h2>
+        <p>
+          This is not an inventory item. It is a weapon system.
+          Forge it and every Stone you possess can be equipped and used
+          during combat.
+        </p>
+
+        <div class="warning">
+          <b>Forge requirements</b><br><br>
+          💎 3 Infinity Stones<br>
+          ✨ 3 Artifacts<br>
+          💰 ${format(forgeCost())} credits
+        </div>
+
+        <button class="btn gold" style="margin-top:18px"
+          onclick="forgeGauntlet()"
+          ${canForge()?"":"disabled"}>
+          🔨 Forge Infinity Gauntlet
+        </button>
+
+        <p style="margin-top:12px;font-size:11px">
+          Current: ${game.stones.length}/3 Stones ·
+          ${game.artifacts.length}/3 Artifacts ·
+          ${format(game.money)}/${format(forgeCost())} credits
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  const sockets=Object.keys(stoneData).map(id=>{
+    const equipped=game.gauntlet.equipped.includes(id);
+    return `
+      <div class="socket ${equipped?"filled":""}"
+        style="--c:${stoneData[id].color};--g:${stoneData[id].glow}">
+        <span>${equipped?stoneData[id].emoji:""}</span>
+      </div>
+    `;
+  }).join("");
+
+  const abilities=game.gauntlet.equipped.map(id=>{
+    const s=stoneData[id];
+    return `
+      <div class="ability" style="--c:${s.color};--g:${s.glow}">
+        <div class="ability-icon">${s.emoji}</div>
+        <h3>${s.ability}</h3>
+        <p>${s.desc}</p>
+        <div class="ability-meta">
+          <span>⚡ ${s.cost} Energy</span>
+          <span>Charge +18</span>
+        </div>
+        <button class="btn small" style="width:100%;background:${s.color};color:#070810"
+          onclick="useAbility('${id}')"
+          ${!game.activeEnemy||game.energy<s.cost?"disabled":""}>
+          USE STONE
+        </button>
+      </div>
+    `;
+  }).join("");
+
+  const available=game.stones.map(id=>{
+    const s=stoneData[id];
+    const equipped=game.gauntlet.equipped.includes(id);
+
+    return `
+      <div class="card" style="border-color:${equipped?s.color:"var(--line)"}">
+        <div style="font-size:25px">${s.emoji}</div>
+        <b>${s.name}</b>
+        <p>${equipped?"Equipped":"Stored"}</p>
+        <button class="btn small ${equipped?"secondary":""}"
+          style="margin-top:9px"
+          onclick="toggleStone('${id}')">
+          ${equipped?"Remove":"Equip"}
+        </button>
+      </div>
+    `;
+  }).join("");
+
+  el.innerHTML=`
+    <div class="gauntlet-stage">
+      <div class="gauntlet">
+        <div class="finger f1"></div>
+        <div class="finger f2"></div>
+        <div class="finger f3"></div>
+        <div class="finger f4"></div>
+        <div class="thumb"></div>
+        <div class="palm"></div>
+        <div class="sockets">${sockets}</div>
+      </div>
+
+      <h2 style="margin:5px 0">INFINITY GAUNTLET</h2>
+      <p style="color:var(--muted);font-size:12px">
+        ${game.gauntlet.equipped.length}/6 Stones equipped
+      </p>
+
+      <div class="charge-box">
+        <div class="charge-title">
+          <span>⚡ GAUNTLET CHARGE</span>
+          <b>${Math.floor(game.gauntlet.charge)}%</b>
+        </div>
+        <div class="progress charge-bar">
+          <i style="width:${game.gauntlet.charge}%"></i>
+        </div>
+      </div>
+
+      <button class="btn danger"
+        style="margin-top:16px;font-size:17px;min-width:220px"
+        onclick="snap()"
+        ${game.gauntlet.equipped.length===6&&game.gauntlet.charge>=100&&game.energy>=60?"":"disabled"}>
+        💥 SNAP
+      </button>
+
+      <p style="color:var(--muted);font-size:10px;margin-top:8px">
+        Requires all 6 Stones + 100% charge + 60 energy.
+      </p>
+    </div>
+
+    <div class="section-title">⚡ Active Abilities</div>
+    ${
+      game.gauntlet.equipped.length
+      ? `<div class="ability-grid">${abilities}</div>`
+      : `<div class="card"><p>No Stones equipped.</p></div>`
+    }
+
+    <div class="section-title">💎 Stone Sockets</div>
+    <div class="grid">${available||`<div class="card"><p>You have no Stones yet.</p></div>`}</div>
+
+    <div class="warning">
+      <b>Combat strategy</b><br>
+      Normal attacks and Energy Strikes build Gauntlet charge.
+      Stone abilities build even more charge.
+      Chaining different Stones creates combo charge.
+      SNAP is deliberately devastating—but bosses survive the first blast.
+    </div>
+  `;
+}
+
+/* ================= RENDER STONES ================= */
+
+function renderStones(){
+  const el=document.getElementById("stoneGrid");
+
+  el.innerHTML=Object.entries(stoneData).map(([id,s])=>{
+    const owned=hasStone(id);
+
+    return `
+      <div class="stone"
+        style="--stone:${s.color};--glow:${s.glow}">
+        ${owned?`<div class="owned">ACQUIRED</div>`:""}
+        <div class="gem"></div>
+        <h3>${s.name}</h3>
+        <p>${s.location}</p>
+        <p><b>Ability:</b> ${s.ability}</p>
+        <p>${owned?s.desc:"Location unknown. Defeat its guardian."}</p>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ================= QUESTS ================= */
+
+function renderQuests(){
+  const quests=[
+    ["First Contact","Complete your first expedition.",game.expeditions>=1],
+    ["Blooded Hunter","Defeat 3 enemies.",game.enemiesDefeated>=3],
+    ["Boss Slayer","Defeat your first boss.",game.bossesDefeated>=1],
+    ["Cosmic Explorer","Visit 5 locations.",game.locationsVisited.length>=5],
+    ["Artifact Collector","Collect 4 artifacts.",game.artifacts.length>=4],
+    ["The First Stone","Acquire 1 Infinity Stone.",game.stones.length>=1],
+    ["Halfway There","Acquire 3 Infinity Stones.",game.stones.length>=3],
+    ["Forge the Weapon","Forge the Infinity Gauntlet.",game.gauntlet.forged],
+    ["Infinity Hunter","Acquire all 6 Infinity Stones.",game.stones.length>=6],
+    ["Snap Ready","Equip all 6 Stones and reach 100% charge.",game.gauntlet.equipped.length===6&&game.gauntlet.charge>=100]
+  ];
+
+  const el=document.getElementById("questList");
+
+  el.innerHTML=quests.map((q,i)=>{
+    const done=q[2];
+
+    if(done && !game.questsCompleted.includes(i)){
+      game.questsCompleted.push(i);
+      game.money+=75+i*25;
+    }
+
+    return `
+      <div class="quest ${done?"done":""}">
+        <div>
+          <h3>${done?"✅":"⬡"} ${q[0]}</h3>
+          <p>${q[1]}</p>
+        </div>
+        <b style="color:${done?"#65f4b0":"#ffd45a"}">
+          ${done?"COMPLETE":"+"+(75+i*25)}
+        </b>
+      </div>
+    `;
+  }).join("");
+
+  save();
+}
+
+/* ================= INVENTORY ================= */
+
+function renderInventory(){
+  const el=document.getElementById("artifactGrid");
+
+  el.innerHTML=artifacts.map(a=>{
+    const owned=game.artifacts.includes(a[0]);
+
+    return `
+      <div class="artifact" style="opacity:${owned?1:.28}">
+        <div class="icon">${a[1]}</div>
+        <h4>${a[0]}</h4>
+        <p>${owned?a[2]:"Unknown artifact"}</p>
+        <div style="margin-top:8px;font-size:9px;color:${owned?"#65f4b0":"#777"}">
+          ${owned?"RECOVERED":"NOT FOUND"}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ================= UPGRADES ================= */
+
+function renderUpgrades(){
+  const upgrades=[
+    ["weaponLevel","⚔️ Starblade",game.weaponLevel,
+      400*game.weaponLevel,
+      "Attack +8",()=>{game.attack+=8}],
+    ["armorLevel","🛡️ Void Armor",game.armorLevel,
+      450*game.armorLevel,
+      "Defense +5, Max HP +18",()=>{game.defense+=5;game.maxHealth+=18}],
+    ["reactorLevel","⚡ Reactor",game.reactorLevel,
+      420*game.reactorLevel,
+      "Max Energy +25",()=>{game.maxEnergy+=25}],
+    ["scannerLevel","👁️ Quantum Scanner",game.scannerLevel,
+      550*game.scannerLevel,
+      "Higher Stone Guardian odds",()=>{}],
+    ["gauntletForge","🧤 Gauntlet Core",game.gauntlet.forgeLevel,
+      900*game.gauntlet.forgeLevel,
+      "Gauntlet charge capacity +20",()=>{
+        game.gauntlet.maxCharge+=20;
+        game.gauntlet.forgeLevel++;
+      }]
+  ];
+
+  const el=document.getElementById("upgradeGrid");
+
+  el.innerHTML=upgrades.map((u,i)=>{
+    let lvl=u[2];
+    let cost=u[3];
+
+    return `
+      <div class="upgrade">
+        <div class="upgrade-row">
+          <h3>${u[1]}</h3>
+          <span class="level">LEVEL ${lvl}</span>
+        </div>
+        <p style="color:var(--muted);font-size:12px">${u[4]}</p>
+        <div class="upgrade-row" style="margin-top:14px">
+          <span class="cost">💰 ${format(cost)}</span>
+          <button class="btn small"
+            onclick="buyUpgrade(${i})"
+            ${game.money<cost?"disabled":""}>
+            UPGRADE
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function buyUpgrade(index){
+  const data=[
+    ["weaponLevel",400*game.weaponLevel,()=>{game.weaponLevel++;game.attack+=8}],
+    ["armorLevel",450*game.armorLevel,()=>{game.armorLevel++;game.defense+=5;game.maxHealth+=18}],
+    ["reactorLevel",420*game.reactorLevel,()=>{game.reactorLevel++;game.maxEnergy+=25}],
+    ["scannerLevel",550*game.scannerLevel,()=>{game.scannerLevel++}],
+    ["gauntletForge",900*game.gauntlet.forgeLevel,()=>{
+      game.gauntlet.forgeLevel++;
+      game.gauntlet.maxCharge+=20;
+    }]
+  ];
+
+  const u=data[index];
+  if(!u)return;
+
+  if(game.money<u[1]){
+    toast("💰 Not enough credits.");
+    return;
+  }
+
+  game.money-=u[1];
+  u[2]();
+
+  toast("⚙️ Upgrade installed.");
+  save();
+  render();
+}
+
+/* ================= COMBAT RENDER ================= */
+
+function renderCombat(){
+  const el=document.getElementById("combatContent");
+  const e=game.activeEnemy;
+
+  if(!e){
+    el.innerHTML=`
+      <div class="hero">
+        <h1>⚔️ No Active Battle</h1>
+        <p>Explore a location to find something worth fighting.</p>
+        <button class="btn" onclick="switchScreen('explore')">Explore</button>
+      </div>
+    `;
+    return;
+  }
+
+  const hpPct=Math.max(0,e.hp/e.maxHp*100);
+  const myPct=Math.max(0,game.health/game.maxHealth*100);
+  const energyPct=Math.max(0,game.energy/game.maxEnergy*100);
+
+  const abilities=game.gauntlet.forged
+    ? game.gauntlet.equipped.map(id=>{
+        const s=stoneData[id];
+        return `
+          <button class="combat-ability"
+            style="--c:${s.color}"
+            onclick="useAbility('${id}')"
+            ${game.energy<s.cost?"disabled":""}>
+            <b>${s.emoji}</b>
+            ${s.ability}
+            <small>${s.cost}⚡</small>
+          </button>
+        `;
+      }).join("")
+    :"";
+
+  el.innerHTML=`
+    <div class="combat">
+      <div class="combat-header">
+        <div>
+          <b>${game.combatLocation.name}</b>
+          <div style="font-size:10px;color:#8892b1">
+            Danger ${game.combatLocation.danger}/7
+          </div>
+        </div>
+        <button class="btn secondary small" onclick="retreat()">🏃 Retreat</button>
+      </div>
+
+      <div class="enemy">
+        <div class="enemy-orb">${e.emoji}</div>
+        <h2>${e.name} ${e.boss?"☠️":""}</h2>
+        <p>
+          ${e.boss?"BOSS":"HOSTILE"}
+          ${e.shield>0?" · 🛡️ Shield "+e.shield:""}
+        </p>
+
+        <div style="max-width:520px;margin:12px auto 0">
+          <div class="upgrade-row" style="font-size:11px">
+            <span>Enemy HP</span>
+            <b>${Math.max(0,e.hp)} / ${e.maxHp}</b>
+          </div>
+          <div class="progress healthbar">
+            <i style="width:${hpPct}%"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div class="upgrade-row">
+          <span>❤️ Your HP</span>
+          <b>${Math.max(0,game.health)} / ${game.maxHealth}</b>
+        </div>
+        <div class="progress healthbar">
+          <i style="width:${myPct}%"></i>
+        </div>
+
+        <div class="upgrade-row" style="margin-top:10px">
+          <span>⚡ Energy</span>
+          <b>${game.energy} / ${game.maxEnergy}</b>
+        </div>
+        <div class="progress energybar">
+          <i style="width:${energyPct}%"></i>
+        </div>
+      </div>
+
+      <div class="combat-log">
+        ${game.combatLogs.join("")}
+      </div>
+
+      <div class="combat-actions">
+        <button class="btn" onclick="playerAttack()">⚔️ Attack</button>
+        <button class="btn cyan" onclick="energyStrike()" ${game.energy<25?"disabled":""}>
+          ⚡ Energy Strike
+        </button>
+        <button class="btn secondary" onclick="combatHeal()" ${game.combatHeals<=0||game.energy<20?"disabled":""}>
+          🩹 Medkit (${game.combatHeals})
+        </button>
+        <button class="btn danger" onclick="retreat()">🏃 Retreat</button>
+      </div>
+
+      ${
+        game.gauntlet.forged
+        ? `
+          <div class="section-title" style="font-size:18px">🧤 Gauntlet Abilities</div>
+          ${
+            abilities
+            ? `<div class="combat-abilities">${abilities}</div>`
+            : `<div class="warning">No Stones are equipped.</div>`
+          }
+
+          <button class="btn gold"
+            style="width:100%;margin-top:10px;font-size:16px"
+            onclick="snap()"
+            ${game.gauntlet.equipped.length===6&&game.gauntlet.charge>=100&&game.energy>=60?"":"disabled"}>
+            💥 SNAP · ${Math.floor(game.gauntlet.charge)}% CHARGE
+          </button>
+        `
+        : `
+          <div class="warning">
+            🧤 You don't have the Infinity Gauntlet yet.
+            Find 3 Stones and 3 artifacts, then forge it.
+          </div>
+        `
+      }
+    </div>
+  `;
+}
+
+/* ================= MAIN RENDER ================= */
+
+function renderStats(){
+  document.getElementById("money").textContent=format(game.money);
+  document.getElementById("energy").textContent=`${Math.floor(game.energy)}/${game.maxEnergy}`;
+  document.getElementById("health").textContent=`${Math.max(0,Math.floor(game.health))}/${game.maxHealth}`;
+  document.getElementById("level").textContent=game.level;
+
+  document.getElementById("xpText").textContent=`${Math.floor(game.xp)} / ${game.xpNeeded}`;
+  document.getElementById("xpBar").style.width=(game.xp/game.xpNeeded*100)+"%";
+
+  document.getElementById("homeHealth").textContent=`${Math.max(0,Math.floor(game.health))} / ${game.maxHealth}`;
+  document.getElementById("homeHealthBar").style.width=(game.health/game.maxHealth*100)+"%";
+
+  document.getElementById("homeEnergy").textContent=`${Math.floor(game.energy)} / ${game.maxEnergy}`;
+  document.getElementById("homeEnergyBar").style.width=(game.energy/game.maxEnergy*100)+"%";
+
+  document.getElementById("battleNav").style.display=game.activeEnemy?"block":"none";
+}
+
+function render(){
+  renderStats();
+  renderLocations();
+  renderStones();
+  renderGauntlet();
+  renderQuests();
+  renderInventory();
+  renderUpgrades();
+  renderCombat();
+}
+
+/* ================= STARFIELD ================= */
+
+function createStars(){
+  const box=document.getElementById("stars");
+
+  for(let i=0;i<140;i++){
+    const s=document.createElement("div");
+    s.className="star";
+    s.style.left=Math.random()*100+"%";
+    s.style.top=Math.random()*100+"%";
+    s.style.animationDelay=(Math.random()*3)+"s";
+    s.style.animationDuration=(1+Math.random()*4)+"s";
+    s.style.opacity=.1+Math.random()*.75;
+    box.appendChild(s);
+  }
+}
+
+/* ================= ENERGY REGEN ================= */
+
+/*
+  Slow regeneration.
+  Base restoration is much more valuable now.
+*/
+setInterval(()=>{
+  if(game.energy<game.maxEnergy){
+    game.energy=Math.min(game.maxEnergy,game.energy+1);
+    renderStats();
+  }
+},8000);
+
+/* Autosave */
+setInterval(save,12000);
+
+/* Initialize */
+load();
+createStars();
+render();
+
+/* Debug / utility available from console if wanted */
+window.resetGame=resetGame;
+</script>
+</body>
+</html>
